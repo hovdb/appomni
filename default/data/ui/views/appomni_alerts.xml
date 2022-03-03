@@ -1,0 +1,127 @@
+<form version="1.1" theme="dark">
+  <label>AppOmni Alerts</label>
+  <init>
+    <set token="eventid_tok">*</set>
+    <set token="rulename_tok">*</set>
+    <set token="usertok">*</set>
+    <set token="service_tok">*</set>
+    <set token="sev_tok">*</set>
+  </init>
+  <search id="basesearch">
+    <query>`appomni_macro` sourcetype=appomni_alerts |fields severity,rule.name,event.kind,event.action,event.outcome,user.name,appomni.service.name{},source.ip,related.user{},related.event{},service.type,appomni.event.id,_time</query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time_tok" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Alert Severity</title>
+        <search base="basesearch">
+          <query>stats count by severity</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <drilldown>
+          <set token="sev_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Alerts</title>
+        <search base="basesearch">
+          <query>search "event.kind"=alert severity=$sev_tok$|timechart count by rule.name</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="rulename_tok">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Failed Logins</title>
+      <chart>
+        <search base="basesearch">
+          <query>search event.action=login_user "event.outcome"=failure|timechart count by user.name</query>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="usertok">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Failed Login Environment Name</title>
+      <chart>
+        <search base="basesearch">
+          <query>search event.action=login_user event.outcome=failure user.name=$usertok$|stats count by appomni.service.name{}</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="service_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>IP location of failed logins</title>
+      <map>
+        <search base="basesearch">
+          <query>search event.action=login_user "event.outcome"=failure user.name=$usertok$ appomni.service.name{}="$service_tok$"|iplocation source.ip|geostats count by user.name</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="mapping.type">marker</option>
+        <option name="refresh.display">progressbar</option>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Alerts with related events</title>
+      <table>
+        <search base="basesearch">
+          <query>search "event.kind"=alert rule.name="$rulename_tok$" related.user{}=$usertok$ severity=$sev_tok$|rename related.user{} AS User|rename rule.name AS "Alert Rule"|table _time, User, "Alert Rule","related.event{}"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="eventid_tok">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Related Events Details</title>
+        <search base="basesearch">
+          <query>search appomni.event.id="$eventid_tok$" user.name="$usertok$"|table _time,event.action,user.name,event.outcome,source.ip,service.type</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

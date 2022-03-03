@@ -1,0 +1,113 @@
+<form version="1.1" theme="dark">
+  <label>AppOmni Events Overview</label>
+  <init>
+    <set token="ST_tok">*</set>
+    <set token="SN_tok">*</set>
+  </init>
+  <description>AppOmni Events Overview</description>
+  <search id="basesearch">
+    <query>`appomni_macro` sourcetype=appomni_alerts event.kind=event NOT appomni.service.type{}=appomni|fields "appomni.service.name{}", "appomni.service.type{}",event.kind, event.action, event.outcome </query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="time_tok" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Total Events</title>
+      <single>
+        <search base="basesearch">
+          <query>search appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|stats count(event.kind)</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Events By Service Type</title>
+      <chart>
+        <search base="basesearch">
+          <query>stats count by "appomni.service.type{}"</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <drilldown>
+          <set token="ST_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <title>Events By Service Name</title>
+      <chart>
+        <search base="basesearch">
+          <query>search appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|stats count by "appomni.service.name{}"</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="SN_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Service Type Action Count</title>
+      <table>
+        <search base="basesearch">
+          <query>search appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|rename appomni.service.type{} AS "Service Type"|rename event.action AS Action |stats count by "Service Type", Action</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Events By Service Over Time</title>
+      <chart>
+        <search base="basesearch">
+          <query>search appomni.service.type{}=$ST_tok$ appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|timechart count by appomni.service.name{}</query>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Successful Logins Over Time</title>
+      <chart>
+        <search base="basesearch">
+          <query>search event.action=login_user "event.outcome"=success appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|timechart count by "appomni.service.name{}"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Failed Logins Over Time</title>
+      <chart>
+        <search base="basesearch">
+          <query>search event.action=login_user "event.outcome"=failure appomni.service.type{}="$ST_tok$" appomni.service.name{}="$SN_tok$"|timechart count by "appomni.service.name{}"</query>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

@@ -1,0 +1,12 @@
+<nav search_view="search">
+  <view name="appomni_events_overview" default='true'/>
+  <view name="appomni_alerts" />
+  <view name="appomni_policy_overview" />
+  <view name="app_installs" />
+  <view name="o365_events" />
+  <view name="sfdc_events" />
+  <view name="slack_events" />
+  <view name="workday_events" />
+  <view name="mitre_attack" />
+  <view name="dashboards" />
+</nav>

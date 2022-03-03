@@ -1,0 +1,70 @@
+<form version="1.1" theme="dark">
+  <init>
+    <set token="event_tok">*</set>
+    <set token="usr_tok">*</set>
+  </init>
+  <label>O365 Events</label>
+  <description>O365 Events</description>
+  <fieldset submitButton="false">
+    <input type="time" token="time_tok">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <search id="basesearch">
+    <query>`appomni_macro` sourcetype=appomni_alerts "appomni.service.type{}"=o365|fields "event.action","appomni.service.type{}","user.name"</query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <chart>
+        <title>O365 Events</title>
+        <search base="basesearch">
+          <query>|timechart count BY event.action</query>
+          
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="event_tok">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>User Name</title>
+        <search base="basesearch">
+          <query>search "event.action"="$event_tok$"|stats count by user.name</query>
+       
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="usr_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Event Details</title>
+        <search base="basesearch">
+          <query>search event.action="$event_tok$" user.name=$usr_tok$|rename event.type{} AS "Event Type"|rename event.action AS "Event Action"|rename resource.type AS "Resource Type"|rename user.name AS "User Name"| table  _time,event.outcome,"User Name","Event Type","Event Action"</query>
+         
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

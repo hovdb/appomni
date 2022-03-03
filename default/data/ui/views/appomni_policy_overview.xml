@@ -1,0 +1,321 @@
+<form version="1.1" theme="dark">
+  <init>
+    <set token="sfdcpolicy_tok">*</set>
+    <set token="o365policy_tok">*</set>
+    <set token="slackpolicy_tok">*</set>
+    <set token="workdaypolicy_tok">*</set>
+  </init>
+  <label>AppOmni Policy Overview</label>
+  <search id="basesearch">
+    <query>`workflow_macro` sourcetype=appomni_workflow|fields "data.universal.policy.policy_type","data.universal.policy.name","data.universal.policy_assessment.evaluation_stats.by_risk_level.Low.total_open","data.universal.policy_assessment.evaluation_stats.by_risk_level.Medium.total_open","data.universal.policy_assessment.evaluation_stats.by_risk_level.High.total_open","data.universal.policy_assessment.evaluation_stats.by_risk_level.Critical.total_open","data.universal.events{}.risk_score","data.universal.events{}.finding_detail","data.universal.events{}.target_entity.primary_target_label","data.universal.policy.results_url"</query>
+    <earliest>$timetok.earliest$</earliest>
+    <latest>$timetok.latest$</latest>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="timetok">
+      <label></label>
+      <default>
+        <earliest>-7d@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>O365 Policies</title>
+      <table>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=o365| dedup "data.universal.policy.name"|rename "data.universal.policy.name" AS "Policy Name"|table "Policy Name"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="o365policy_tok">$click.value2$</set>
+          <set token="policy_tok">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <single>
+        <title>O365 Low Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=o365 "data.universal.policy.name"="$o365policy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Low.total_open as "Low Open"|stats count by "Low Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0x118832"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>O365 Medium Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=o365 "data.universal.policy.name"="$o365policy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Medium.total_open as "Medium Open"|stats count by "Medium Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xcba700"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>O365 High Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=o365 "data.universal.policy.name"="$o365policy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.High.total_open as "High Open"|stats count by "High Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xd94e17"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>O365 Critical Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=o365 "data.universal.policy.name"="$o365policy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Critical.total_open as "Critical Open"|stats count by "Critical Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Salesforce Policies</title>
+      <table>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=sfdc| dedup "data.universal.policy.name"|rename "data.universal.policy.name" AS "Policy Name"|table "Policy Name"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="sfdcpolicy_tok">$click.value2$</set>
+          <set token="policy_tok">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <single>
+        <title>SFDC Low Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=sfdc "data.universal.policy.name"="$sfdcpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Low.total_open as "Low Open"|stats count by "Low Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0x118832"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>SFDC Medium Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=sfdc "data.universal.policy.name"="$sfdcpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Medium.total_open as "Medium Open"|stats count by "Medium Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xcba700"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>SFDC High Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=sfdc "data.universal.policy.name"="$sfdcpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.High.total_open as "High Open"|stats count by "High Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xf1813f"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>SFDC Critical Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=sfdc "data.universal.policy.name"="$sfdcpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Critical.total_open as "Critical Open"|stats count by "Critical Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Slack Policies</title>
+      <table>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=slack| dedup "data.universal.policy.name"|rename "data.universal.policy.name" AS "Policy Name"|table "Policy Name"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="slackpolicy_tok">$click.value2$</set>
+          <set token="policy_tok">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <single>
+        <title>Slack Low Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$slackpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Low.total_open as "Low Open"|stats count by "Low Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0x118832"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Slack Medium Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$slackpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Medium.total_open as "Medium Open"|stats count by "Medium Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xcba700"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Slack High Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$slackpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.High.total_open as "High Open"|stats count by "High Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xd94e17"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Slack Critical Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$slackpolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Critical.total_open as "Critical Open"|stats count by "Critical Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Workday Policies</title>
+      <table>
+        <search base="basesearch">
+          <query>search "data.universal.policy.policy_type"=workday| dedup "data.universal.policy.name"|rename "data.universal.policy.name" AS "Policy Name"|table "Policy Name"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <drilldown>
+          <set token="workdaypolicy_tok">$click.value2$</set>
+          <set token="policy_tok">$click.value2$</set>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <single>
+        <title>Slack Low Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$workdaypolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Low.total_open as "Low Open"|stats count by "Low Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0x118832"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Workday Medium Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$workdaypolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Medium.total_open as "Medium Open"|stats count by "Medium Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xcba700"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Workday High Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$workdaypolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.High.total_open as "High Open"|stats count by "High Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xd94e17"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Workday Critical Risk Open</title>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$workdaypolicy_tok$"|rename data.universal.policy_assessment.evaluation_stats.by_risk_level.Critical.total_open as "Critical Open"|stats count by "Critical Open"</query>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x555","0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search base="basesearch">
+          <query>search "data.universal.policy.name"="$policy_tok$"|rename "data.universal.policy.results_url" AS "AppOmni URL"|rename "data.universal.events{}.target_entity.primary_target_label" AS "Target Label"|rename "data.universal.events{}.finding_detail" AS Findings|rename "data.universal.events{}.risk_score" AS "Risk Score"|sort -"Risk Score"| table  "AppOmni URL",_time,"Target Label","Findings", "Risk Score"</query>
+        </search>
+        <option name="drilldown">cell</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <link target="_blank">$click.value|n$</link>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>

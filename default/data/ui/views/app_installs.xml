@@ -1,0 +1,66 @@
+<form version="1.1" theme="dark">
+  <init>
+    <set token="service_tok">*</set>
+    <set token="user_tok">*</set>
+  </init>
+  <label>App Installs</label>
+  <description>Third Party Apps Installed</description>
+  <fieldset submitButton="false">
+    <input type="time" token="time_tok" searchWhenChanged="true">
+      <label>Time</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <search id="basesearch">
+    <query>`appomni_macro` sourcetype=appomni_alerts "event.action"=install_app|fields "event.action","user.name","event.dataset","appomni.service.name{}",message</query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <row>
+    <panel>
+      <chart>
+        <title>App Installs By Service Name</title>
+         <search base="basesearch">
+          <query>|timechart count BY "appomni.service.name{}"</query>
+         
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="service_tok">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>User Name</title>
+         <search base="basesearch">
+          <query>|stats count BY "user.name"</query>
+          
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="user_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Event details</title>
+        <search base="basesearch">
+          <query>search "appomni.service.name{}"="$service_tok$" user.name="$user_tok$"|table _time,event.action,"appomni.service.name{}","resource.name", message</query>
+         
+        </search>
+        <option name="drilldown">cell</option>
+      </table>
+    </panel>
+  </row>
+</form>

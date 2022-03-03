@@ -1,0 +1,30 @@
+[appomni_workflow]
+ADD_EXTRA_TIME_FIELDS = true
+BREAK_ONLY_BEFORE_DATE = 
+DATETIME_CONFIG = 
+KV_MODE = json
+LINE_BREAKER = }}
+NO_BINARY_CHECK = true
+SHOULD_LINEMERGE = false
+TIME_PREFIX = "completion_date":
+TRUNCATE = 0
+category = Custom
+description = AppOmni Workflow JSON
+disabled = false
+pulldown_type = true
+
+[appomni_alerts]
+ADD_EXTRA_TIME_FIELDS = true
+BREAK_ONLY_BEFORE_DATE =
+DATETIME_CONFIG =
+KV_MODE = json
+LINE_BREAKER = }}
+LOOKUP-alert severity = alert_severity "event.severity" AS "event.severity" OUT>
+NO_BINARY_CHECK = true
+SHOULD_LINEMERGE = false
+TIME_PREFIX = "@timestamp":
+TRUNCATE = 0
+category = Custom
+description = AppOmni Alerts JSON
+disabled = false
+pulldown_type = true

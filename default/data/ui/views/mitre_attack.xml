@@ -1,0 +1,93 @@
+<form version="1.1" theme="dark">
+  <init>
+    <set token="sev_tok">*</set>
+    <set token="service_tok">*</set>
+    <set token="tactic_tok">*</set>
+  </init>
+  <label>MITRE ATT&amp;CK</label>
+  <description>MITRE ATT&amp;CK Alerts</description>
+  <search id="basesearch">
+    <query>`appomni_macro` sourcetype=appomni_alerts "threat.framework"="MITRE ATT&amp;CK" |fields "threat.tactic.name{}","threat.tactic.id{}","threat.technique.name{}","threat.technique.id{}","appomni.service.type{}","threat.framework","severity","related.user{}","message"</query>
+    <earliest>$time_tok.earliest$</earliest>
+    <latest>$time_tok.latest$</latest>
+  </search>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_tok">
+      <label>Time</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>MITRE ATT&amp;CK Alert Risk Severity</title>
+        <search base="basesearch">
+          <query>search severity=$sev_tok$ "threat.tactic.name{}"="$tactic_tok$" "appomni.service.type{}"=$service_tok$|stats count by severity</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="sev_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>MITRE ATT&amp;CK Tactic Alerts Over Time</title>
+        <search base="basesearch">
+          <query>search severity=$sev_tok$ "threat.tactic.name{}"="$tactic_tok$" "appomni.service.type{}"=$service_tok$|rename threat.tactic.name{} AS "Tactic Name"|rename threat.tactic.id{} AS "Tactic ID"|rename threat.technique.name{} AS "Technique Name"|timechart count by "Tactic Name"</query>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="tactic_tok">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Service Type</title>
+        <search base="basesearch">
+          <query>search severity=$sev_tok$ "threat.tactic.name{}"="$tactic_tok$" "appomni.service.type{}"=$service_tok$|stats count by appomni.service.type{}</query>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <drilldown>
+          <set token="service_tok">$click.value$</set>
+        </drilldown>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>MITRE ATT&amp;CK Alerts Count by Threat and Technique</title>
+        <search base="basesearch">
+          <query>search  severity=$sev_tok$ "threat.tactic.name{}"="$tactic_tok$" |rename threat.tactic.name{} AS "Tactic Name"|rename threat.tactic.id{} AS "Tactic ID"|rename threat.technique.name{} AS "Technique Name"|rename threat.technique.id{} AS "Technique ID" |stats count by "Tactic Name","Tactic ID","Technique Name","Technique ID"</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>Alert Details</title>
+        <search base="basesearch">
+          <query>search severity=$sev_tok$ "threat.tactic.name{}"="$tactic_tok$" "appomni.service.type{}"=$service_tok$|rename "related.user{}" AS "User"|table _time, "User",message</query>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>
